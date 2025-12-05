@@ -46,27 +46,3 @@ jobs:
             org.opencontainers.image.licenses=MIT
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      # --- 下面是新增的部分，用于启动项目 ---
-      - name: Run Project (Start Tunnel)
-        env:
-          ARGO_AUTH: ${{ secrets.ARGO_AUTH }}
-          ARGO_DOMAIN: ${{ secrets.ARGO_DOMAIN }}
-        run: |
-          echo "Starting the container..."
-          # 运行刚刚构建好的镜像
-          # -d: 后台运行
-          # --network host: 使用主机网络，方便穿透
-          # -e: 传入环境变量（你的密钥）
-          docker run -d \
-            --name vps-runner \
-            --restart unless-stopped \
-            --network host \
-            -e ARGO_AUTH="${{ secrets.ARGO_AUTH }}" \
-            -e ARGO_DOMAIN="${{ secrets.ARGO_DOMAIN }}" \
-            ghcr.io/${{ github.repository_owner }}/nodejs-vps2:latest
-
-          echo "Container started! Keeping alive for 6 hours..."
-          # GitHub Actions 必须有前台任务在跑，否则会自动结束
-          # 这里我们让它休眠 6 小时（21600秒），这是 GitHub 免费版的最长限制
-          sleep 21600
